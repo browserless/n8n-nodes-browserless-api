@@ -11,6 +11,10 @@
         "name": "browserless.io",
         "email": "support@browserless.io"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/browserless/n8n-nodes-browserless.git"
+    },
    "scripts": {
 		"build": "n8n-node build",
 		"build:watch": "tsc --watch",
