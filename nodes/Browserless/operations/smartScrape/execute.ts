@@ -19,7 +19,7 @@ export async function execute(
 	const response = (await browserlessApiRequest.call(
 		this,
 		'POST',
-		'/chromium/smart-scrape',
+		'/smart-scrape',
 		body,
 	)) as IDataObject;
 

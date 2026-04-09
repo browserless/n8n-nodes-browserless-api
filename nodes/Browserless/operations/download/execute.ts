@@ -5,14 +5,12 @@ export async function execute(
 	this: IExecuteFunctions,
 	index: number,
 ): Promise<INodeExecutionData[]> {
-	const url = this.getNodeParameter('url', index, '') as string;
 	const code = this.getNodeParameter('code', index, '') as string;
 	const contextStr = this.getNodeParameter('context', index, '{}') as string;
 
-	const body: Record<string, unknown> = {};
-
-	if (url) body.url = url;
-	if (code) body.code = code;
+	const body: Record<string, unknown> = {
+		code,
+	};
 
 	try {
 		body.context = JSON.parse(contextStr);
@@ -23,7 +21,7 @@ export async function execute(
 	const response = (await browserlessApiRequest.call(
 		this,
 		'POST',
-		'/chromium/download',
+		'/download',
 		body,
 		{ encoding: 'arraybuffer' },
 	)) as BinaryResponse;

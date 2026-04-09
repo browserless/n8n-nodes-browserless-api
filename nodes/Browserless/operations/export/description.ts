@@ -13,4 +13,16 @@ export const exportFields: INodeProperties[] = [
 			},
 		},
 	},
+	{
+		displayName: 'Include Resources',
+		name: 'includeResources',
+		type: 'boolean',
+		default: false,
+		description: 'Whether to bundle all page resources (CSS, images, etc.) into a ZIP file',
+		displayOptions: {
+			show: {
+				operation: ['exportContent'],
+			},
+		},
+	},
 ];

@@ -21,7 +21,7 @@ export async function execute(
 	const response = (await browserlessApiRequest.call(
 		this,
 		'POST',
-		'/chromium/map',
+		'/map',
 		body,
 	)) as IDataObject;
 

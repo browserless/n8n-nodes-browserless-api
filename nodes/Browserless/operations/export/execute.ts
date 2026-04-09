@@ -8,7 +8,13 @@ export async function execute(
 	const url = this.getNodeParameter('url', index) as string;
 	const fileName = this.getNodeParameter('fileName', index, 'export') as string;
 
+	const includeResources = this.getNodeParameter('includeResources', index, false) as boolean;
+
 	const body: Record<string, unknown> = { url };
+
+	if (includeResources) {
+		body.includeResources = true;
+	}
 
 	const response = (await browserlessApiRequest.call(this, 'POST', '/chromium/export', body, {
 		encoding: 'arraybuffer',

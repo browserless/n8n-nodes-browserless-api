@@ -23,7 +23,7 @@ export async function execute(
 	const response = (await browserlessApiRequest.call(
 		this,
 		'POST',
-		'/chromium/function',
+		'/function',
 		body,
 	)) as IDataObject;
 

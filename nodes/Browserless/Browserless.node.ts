@@ -48,7 +48,6 @@ const URL_OPERATIONS = [
 	'unblock',
 	'performanceAudit',
 	'crawl',
-	'download',
 ];
 
 // Operations that accept the shared wait/navigation options
