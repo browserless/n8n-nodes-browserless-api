@@ -1,6 +1,6 @@
 {
     "name": "@browserless.io/n8n-nodes-browserless",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "n8n community node for the Browserless REST APIs",
     "license": "MIT",
     "homepage": "https://browserless.io",
@@ -15,15 +15,15 @@
         "type": "git",
         "url": "https://github.com/browserless/n8n-nodes-browserless.git"
     },
-   "scripts": {
-		"build": "n8n-node build",
-		"build:watch": "tsc --watch",
-		"dev": "n8n-node dev",
-		"lint": "n8n-node lint",
-		"lint:fix": "n8n-node lint --fix",
-		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
-	},
+    "scripts": {
+        "build": "n8n-node build",
+        "build:watch": "tsc --watch",
+        "dev": "n8n-node dev",
+        "lint": "n8n-node lint",
+        "lint:fix": "n8n-node lint --fix",
+        "release": "n8n-node release",
+        "prepublishOnly": "n8n-node prerelease"
+    },
     "files": [
         "dist"
     ],
