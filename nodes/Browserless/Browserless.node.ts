@@ -41,12 +41,11 @@ const URL_OPERATIONS = [
 	'crawl',
 ];
 
-// Operations that accept the shared wait/navigation options
-const WAIT_OPERATIONS = [
+// Browser-based operations that accept Puppeteer options (viewport, cookies, auth, waitFor, etc.)
+const BROWSER_OPERATIONS = [
 	'smartScrape',
 	'screenshot',
 	'pdf',
-	'crawl',
 ];
 
 export class Browserless implements INodeType {
@@ -146,7 +145,7 @@ export class Browserless implements INodeType {
 			getUrlField(URL_OPERATIONS),
 
 			// Shared wait/navigation options
-			getWaitOptions(WAIT_OPERATIONS),
+			getWaitOptions(BROWSER_OPERATIONS),
 
 			// Operation-specific fields
 			...smartScrapeFields,

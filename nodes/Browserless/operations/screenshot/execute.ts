@@ -25,9 +25,20 @@ export async function execute(
 	if (additionalFields.type) screenshotOptions.type = additionalFields.type;
 	if (additionalFields.fullPage) screenshotOptions.fullPage = additionalFields.fullPage;
 	if (additionalFields.quality !== undefined) screenshotOptions.quality = additionalFields.quality;
-	if (additionalFields.omitBackground)
-		screenshotOptions.omitBackground = additionalFields.omitBackground;
+	if (additionalFields.omitBackground) screenshotOptions.omitBackground = true;
 	if (additionalFields.encoding) screenshotOptions.encoding = additionalFields.encoding;
+	if (additionalFields.optimizeForSpeed) screenshotOptions.optimizeForSpeed = true;
+	if (additionalFields.captureBeyondViewport) screenshotOptions.captureBeyondViewport = true;
+
+	// Clip region
+	if (additionalFields.clipWidth || additionalFields.clipHeight) {
+		screenshotOptions.clip = {
+			x: additionalFields.clipX || 0,
+			y: additionalFields.clipY || 0,
+			width: additionalFields.clipWidth || 0,
+			height: additionalFields.clipHeight || 0,
+		};
+	}
 
 	const body: Record<string, unknown> = {
 		url,

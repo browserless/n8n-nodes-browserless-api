@@ -6,7 +6,7 @@ export async function execute(
 	index: number,
 ): Promise<INodeExecutionData[]> {
 	const url = this.getNodeParameter('url', index) as string;
-	const limit = this.getNodeParameter('limit', index, 100) as number;
+	const limit = this.getNodeParameter('limit', index, 50) as number;
 	const additionalFields = this.getNodeParameter('additionalFields', index, {}) as Record<
 		string,
 		unknown
@@ -15,8 +15,27 @@ export async function execute(
 	const body: Record<string, unknown> = {
 		url,
 		limit,
-		...additionalFields,
 	};
+
+	if (additionalFields.search) body.search = additionalFields.search;
+	if (additionalFields.sitemap) body.sitemap = additionalFields.sitemap;
+	if (additionalFields.includeSubdomains !== undefined)
+		body.includeSubdomains = additionalFields.includeSubdomains;
+	if (additionalFields.ignoreQueryParameters !== undefined)
+		body.ignoreQueryParameters = additionalFields.ignoreQueryParameters;
+	if (additionalFields.timeout) body.timeout = additionalFields.timeout;
+
+	// Location
+	if (additionalFields.locationCountry || additionalFields.locationLanguages) {
+		const location: Record<string, unknown> = {};
+		if (additionalFields.locationCountry) location.country = additionalFields.locationCountry;
+		if (additionalFields.locationLanguages) {
+			location.languages = (additionalFields.locationLanguages as string)
+				.split(',')
+				.map((s) => s.trim());
+		}
+		body.location = location;
+	}
 
 	const response = (await browserlessApiRequest.call(
 		this,
