@@ -9,9 +9,10 @@ export async function browserlessApiRequest(
 	this: IExecuteFunctions,
 	method: 'GET' | 'POST' | 'DELETE',
 	endpoint: string,
-	body: object = {},
+	body: object | string = {},
 	options: {
 		encoding?: 'arraybuffer';
+		contentType?: string;
 	} = {},
 ) {
 	const credentials = await this.getCredentials('browserlessApi');
@@ -21,8 +22,15 @@ export async function browserlessApiRequest(
 		method,
 		url: `${baseUrl}${endpoint}`,
 		body,
-		json: !options.encoding,
+		json: options.contentType ? false : !options.encoding,
 	};
+
+	if (options.contentType) {
+		requestOptions.headers = {
+			...(requestOptions.headers ?? {}),
+			'Content-Type': options.contentType,
+		};
+	}
 
 	if (options.encoding) {
 		requestOptions.encoding = options.encoding;
