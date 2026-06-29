@@ -15,7 +15,6 @@ import { pdfFields } from './operations/pdf/description';
 import { searchFields } from './operations/search/description';
 import { mapFields } from './operations/map/description';
 import { functionFields } from './operations/function/description';
-import { downloadFields } from './operations/download/description';
 import { exportFields } from './operations/export/description';
 import { performanceFields } from './operations/performance/description';
 import { crawlFields } from './operations/crawl/description';
@@ -26,7 +25,6 @@ import { execute as executePdf } from './operations/pdf/execute';
 import { execute as executeSearch } from './operations/search/execute';
 import { execute as executeMap } from './operations/map/execute';
 import { execute as executeFunction } from './operations/function/execute';
-import { execute as executeDownload } from './operations/download/execute';
 import { execute as executeExport } from './operations/export/execute';
 import { execute as executePerformance } from './operations/performance/execute';
 import { execute as executeCrawl } from './operations/crawl/execute';
@@ -82,12 +80,6 @@ export class Browserless implements INodeType {
 						value: 'crawl',
 						description: 'Crawl a website and extract content from every page',
 						action: 'Crawl a website',
-					},
-					{
-						name: 'Download',
-						value: 'download',
-						description: 'Download a file triggered by browser automation',
-						action: 'Download a file',
 					},
 					{
 						name: 'Export',
@@ -155,7 +147,6 @@ export class Browserless implements INodeType {
 			...searchFields,
 			...mapFields,
 			...functionFields,
-			...downloadFields,
 			...exportFields,
 			...performanceFields,
 			...crawlFields,
@@ -190,9 +181,6 @@ export class Browserless implements INodeType {
 						break;
 					case 'runFunction':
 						result = await executeFunction.call(this, i);
-						break;
-					case 'download':
-						result = await executeDownload.call(this, i);
 						break;
 					case 'exportContent':
 						result = await executeExport.call(this, i);

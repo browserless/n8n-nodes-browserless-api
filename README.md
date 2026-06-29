@@ -20,11 +20,19 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 - **Search** — Search the web and return results
 - **Map URLs** — Discover URLs on a site or within its sitemap
 - **Run Function** — Execute custom JavaScript/Puppeteer code server-side
-- **Download** — Download a file triggered by browser automation
 - **Export** — Fetch a URL and stream it in its native content type
 - **Unblock** — Bypass CAPTCHAs and bot detection to access a page
 - **Performance Audit** — Run Lighthouse audits for performance, SEO, and accessibility
 - **Crawl** — Crawl a website and extract content from every page
+
+## Agentic browsing (MCP)
+
+This node wraps Browserless's REST APIs. For an **interactive web agent** — a persistent browser session that navigates, clicks, types, solves captchas, and completes multi-step tasks — use n8n's built-in **MCP Client Tool** node pointed at the hosted Browserless MCP server:
+
+- **Endpoint (HTTP Streamable):** `https://mcp.browserless.io/mcp`
+- **Auth:** Header `Authorization: Bearer <your-token>`
+
+That surfaces `browserless_agent` plus all the current MCP tools (smart-scrape, search, crawl, map, function, performance, export, skills) to your AI Agent node, without this REST node having to host the agent loop.
 
 ## Credentials
 
