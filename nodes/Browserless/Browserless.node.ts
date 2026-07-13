@@ -41,11 +41,7 @@ const URL_OPERATIONS = [
 ];
 
 // Browser-based operations that accept Puppeteer options (viewport, cookies, auth, waitFor, etc.)
-const BROWSER_OPERATIONS = [
-	'smartScrape',
-	'screenshot',
-	'pdf',
-];
+const BROWSER_OPERATIONS = ['smartScrape', 'screenshot', 'pdf'];
 
 export class Browserless implements INodeType {
 	description: INodeTypeDescription = {
@@ -126,8 +122,7 @@ export class Browserless implements INodeType {
 					{
 						name: 'Smart Scrape',
 						value: 'smartScrape',
-						description:
-							'Scrape a page with automatic fallbacks for blocked or JS-heavy sites',
+						description: 'Scrape a page with automatic fallbacks for blocked or JS-heavy sites',
 						action: 'Smart scrape a page',
 					},
 				],

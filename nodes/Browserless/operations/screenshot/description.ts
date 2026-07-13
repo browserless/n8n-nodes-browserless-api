@@ -83,8 +83,7 @@ export const screenshotFields: INodeProperties[] = [
 				name: 'omitBackground',
 				type: 'boolean',
 				default: false,
-				description:
-					'Whether to hide the default white background for transparent screenshots',
+				description: 'Whether to hide the default white background for transparent screenshots',
 			},
 			{
 				displayName: 'Optimize For Speed',

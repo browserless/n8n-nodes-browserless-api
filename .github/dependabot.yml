@@ -10,7 +10,7 @@ updates:
     groups:
       types:
         patterns:
-          - "@types/*"
+          - '@types/*'
       minor-and-patch:
         update-types:
           - minor
@@ -23,4 +23,4 @@ updates:
     groups:
       github-actions:
         patterns:
-          - "*"
+          - '*'

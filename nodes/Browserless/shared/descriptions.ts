@@ -66,8 +66,7 @@ export function getWaitOptions(operations: string[]): INodeProperties {
 				name: 'cookies',
 				type: 'json',
 				default: '[]',
-				placeholder:
-					'e.g. [{"name": "session", "value": "abc123", "domain": "example.com"}]',
+				placeholder: 'e.g. [{"name": "session", "value": "abc123", "domain": "example.com"}]',
 				description: 'Cookies to set on the page before navigation',
 			},
 			{
@@ -125,8 +124,7 @@ export function getWaitOptions(operations: string[]): INodeProperties {
 				type: 'string',
 				default: '',
 				placeholder: 'e.g. *.css,*.png,tracker.js',
-				description:
-					'Comma-separated URL patterns to block (supports wildcards)',
+				description: 'Comma-separated URL patterns to block (supports wildcards)',
 			},
 			{
 				displayName: 'Reject Resource Types',

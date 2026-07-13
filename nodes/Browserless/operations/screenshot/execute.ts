@@ -50,13 +50,9 @@ export async function execute(
 		body.selector = additionalFields.selector;
 	}
 
-	const response = (await browserlessApiRequest.call(
-		this,
-		'POST',
-		'/chromium/screenshot',
-		body,
-		{ encoding: 'arraybuffer' },
-	)) as BinaryResponse;
+	const response = (await browserlessApiRequest.call(this, 'POST', '/chromium/screenshot', body, {
+		encoding: 'arraybuffer',
+	})) as BinaryResponse;
 
 	const mimeType = MIME_TYPES[imageType] || 'image/png';
 	const fileName = `screenshot.${imageType}`;

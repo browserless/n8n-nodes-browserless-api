@@ -20,17 +20,11 @@ export async function execute(
 	if (additionalFields.tbs) body.tbs = additionalFields.tbs;
 	if (additionalFields.timeout) body.timeout = additionalFields.timeout;
 
-	if (
-		additionalFields.sources &&
-		(additionalFields.sources as string[]).length > 0
-	) {
+	if (additionalFields.sources && (additionalFields.sources as string[]).length > 0) {
 		body.sources = additionalFields.sources;
 	}
 
-	if (
-		additionalFields.categories &&
-		(additionalFields.categories as string[]).length > 0
-	) {
+	if (additionalFields.categories && (additionalFields.categories as string[]).length > 0) {
 		body.categories = additionalFields.categories;
 	}
 
@@ -56,12 +50,7 @@ export async function execute(
 		body.scrapeOptions = scrapeOptions;
 	}
 
-	const response = (await browserlessApiRequest.call(
-		this,
-		'POST',
-		'/search',
-		body,
-	)) as IDataObject;
+	const response = (await browserlessApiRequest.call(this, 'POST', '/search', body)) as IDataObject;
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

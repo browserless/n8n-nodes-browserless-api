@@ -37,12 +37,7 @@ export async function execute(
 		body.location = location;
 	}
 
-	const response = (await browserlessApiRequest.call(
-		this,
-		'POST',
-		'/map',
-		body,
-	)) as IDataObject;
+	const response = (await browserlessApiRequest.call(this, 'POST', '/map', body)) as IDataObject;
 
 	return [{ json: response, pairedItem: { item: index } }];
 }

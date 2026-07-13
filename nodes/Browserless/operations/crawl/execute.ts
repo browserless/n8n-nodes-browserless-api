@@ -64,21 +64,13 @@ export async function execute(
 		const webhook: Record<string, unknown> = {
 			url: additionalFields.webhookUrl,
 		};
-		if (
-			additionalFields.webhookEvents &&
-			(additionalFields.webhookEvents as string[]).length > 0
-		) {
+		if (additionalFields.webhookEvents && (additionalFields.webhookEvents as string[]).length > 0) {
 			webhook.events = additionalFields.webhookEvents;
 		}
 		body.webhook = webhook;
 	}
 
-	const response = (await browserlessApiRequest.call(
-		this,
-		'POST',
-		'/crawl',
-		body,
-	)) as IDataObject;
+	const response = (await browserlessApiRequest.call(this, 'POST', '/crawl', body)) as IDataObject;
 
 	return [{ json: response, pairedItem: { item: index } }];
 }
