@@ -1,53 +1,59 @@
 {
-    "name": "n8n-nodes-browserless-api",
-    "version": "1.3.0",
-    "description": "n8n community node for the Browserless REST APIs",
-    "license": "MIT",
-    "homepage": "https://browserless.io",
-    "keywords": [
-        "n8n-community-node-package"
-    ],
-    "author": {
-        "name": "browserless.io",
-        "email": "support@browserless.io"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/browserless/n8n-nodes-browserless-api.git"
-    },
-    "scripts": {
-        "build": "n8n-node build",
-        "build:watch": "tsc --watch",
-        "dev": "n8n-node dev",
-        "lint": "n8n-node lint",
-        "lint:fix": "n8n-node lint --fix",
-        "release": "n8n-node release",
-        "prepublishOnly": "n8n-node prerelease"
-    },
-    "files": [
-        "dist"
-    ],
-    "n8n": {
-        "n8nNodesApiVersion": 1,
-        "strict": true,
-        "credentials": [
-            "dist/credentials/BrowserlessApi.credentials.js"
-        ],
-        "nodes": [
-            "dist/nodes/Browserless/Browserless.node.js"
-        ]
-    },
-    "devDependencies": {
-        "@n8n/node-cli": "*",
-        "eslint": "9.32.0",
-        "prettier": "3.6.2",
-        "release-it": "^20.2.1",
-        "typescript": "5.9.2"
-    },
-    "peerDependencies": {
-        "n8n-workflow": "*"
-    },
-    "engines": {
-        "npm": ">=11.10.0"
-    }
+	"name": "n8n-nodes-browserless-api",
+	"version": "1.3.0",
+	"description": "n8n community node for the Browserless REST APIs",
+	"license": "MIT",
+	"homepage": "https://browserless.io",
+	"keywords": [
+		"n8n-community-node-package"
+	],
+	"author": {
+		"name": "browserless.io",
+		"email": "support@browserless.io"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/browserless/n8n-nodes-browserless-api.git"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease",
+		"prepare": "husky"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/BrowserlessApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/Browserless/Browserless.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "*",
+		"eslint": "9.32.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^17.0.8",
+		"prettier": "3.6.2",
+		"release-it": "^20.2.1",
+		"typescript": "5.9.2"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	},
+	"engines": {
+		"npm": ">=11.10.0"
+	},
+	"lint-staged": {
+		"**/*": "prettier --write --ignore-unknown"
+	}
 }

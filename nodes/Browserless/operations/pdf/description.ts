@@ -166,8 +166,7 @@ export const pdfFields: INodeProperties[] = [
 				name: 'preferCSSPageSize',
 				type: 'boolean',
 				default: false,
-				description:
-					'Whether to use the CSS-defined page size instead of the format option',
+				description: 'Whether to use the CSS-defined page size instead of the format option',
 			},
 			{
 				displayName: 'Print Background',

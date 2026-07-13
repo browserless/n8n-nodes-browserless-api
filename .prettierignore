@@ -1,0 +1,3 @@
+# npm owns the lockfile format (2-space JSON); this repo's prettier config
+# uses tabs, so checking it would fight every npm install.
+package-lock.json

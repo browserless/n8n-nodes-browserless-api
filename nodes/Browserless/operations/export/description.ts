@@ -52,8 +52,7 @@ export const exportFields: INodeProperties[] = [
 				name: 'includeResources',
 				type: 'boolean',
 				default: false,
-				description:
-					'Whether to bundle all page resources (CSS, images, etc.) into a ZIP file',
+				description: 'Whether to bundle all page resources (CSS, images, etc.) into a ZIP file',
 			},
 			{
 				displayName: 'Referer',

@@ -36,13 +36,9 @@ export async function execute(
 
 	const body = buildFunctionRequestBody(code, context);
 
-	const response = (await browserlessApiRequest.call(
-		this,
-		'POST',
-		'/function',
-		body,
-		{ contentType: 'application/javascript' },
-	)) as IDataObject;
+	const response = (await browserlessApiRequest.call(this, 'POST', '/function', body, {
+		contentType: 'application/javascript',
+	})) as IDataObject;
 
 	return [{ json: response, pairedItem: { item: index } }];
 }
