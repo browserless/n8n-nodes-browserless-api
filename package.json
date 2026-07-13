@@ -23,7 +23,7 @@
 		"lint:fix": "n8n-node lint --fix",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease",
-		"prepare": "husky"
+		"hooks:install": "husky"
 	},
 	"files": [
 		"dist"
