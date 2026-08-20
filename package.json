@@ -21,6 +21,8 @@
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
+		"test": "node --test test/agentRun.test.ts",
+		"test:live": "node --test test/live.agentRun.test.ts",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease",
 		"hooks:install": "husky"
