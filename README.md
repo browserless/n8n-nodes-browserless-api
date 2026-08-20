@@ -12,20 +12,20 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-- **Get Content** — Retrieve the fully rendered HTML of a page, including JavaScript-rendered content
-- **Scrape** — Extract structured data from a page using CSS selectors
 - **Smart Scrape** — Scrape a page with automatic fallbacks for blocked or JS-heavy sites
 - **Screenshot** — Capture a screenshot as PNG, JPEG, or WebP
 - **PDF** — Generate a PDF document from a web page
 - **Search** — Search the web and return results
 - **Map URLs** — Discover URLs on a site or within its sitemap
+- **Run Agent** — Give the browser agent a natural-language task and get its answer back
 - **Run Function** — Execute custom JavaScript/Puppeteer code server-side
 - **Export** — Fetch a URL and stream it in its native content type
-- **Unblock** — Bypass CAPTCHAs and bot detection to access a page
 - **Performance Audit** — Run Lighthouse audits for performance, SEO, and accessibility
 - **Crawl** — Crawl a website and extract content from every page
 
 ## Agentic browsing (MCP)
+
+**Run Agent** submits one self-contained task over REST and returns one answer. For an interactive, multi-step browser session driven by an AI Agent node, use the MCP Client Tool instead.
 
 This node wraps Browserless's REST APIs. For an **interactive web agent** — a persistent browser session that navigates, clicks, types, solves captchas, and completes multi-step tasks — use n8n's built-in **MCP Client Tool** node pointed at the hosted Browserless MCP server:
 

@@ -5,25 +5,36 @@ interface BinaryResponse {
 	headers: Record<string, string>;
 }
 
+interface RequestOptions {
+	encoding?: 'arraybuffer';
+	contentType?: string;
+}
+
+export function buildHttpRequestOptions(
+	method: 'GET' | 'POST' | 'DELETE',
+	url: string,
+	body: object | string = {},
+	options: RequestOptions = {},
+): IHttpRequestOptions {
+	return {
+		method,
+		url,
+		...(method === 'GET' ? {} : { body }),
+		json: options.contentType ? false : !options.encoding,
+	};
+}
+
 export async function browserlessApiRequest(
 	this: IExecuteFunctions,
 	method: 'GET' | 'POST' | 'DELETE',
 	endpoint: string,
 	body: object | string = {},
-	options: {
-		encoding?: 'arraybuffer';
-		contentType?: string;
-	} = {},
+	options: RequestOptions = {},
 ) {
 	const credentials = await this.getCredentials('browserlessApi');
 	const baseUrl = (credentials.url as string).replace(/\/+$/, '');
 
-	const requestOptions: IHttpRequestOptions = {
-		method,
-		url: `${baseUrl}${endpoint}`,
-		body,
-		json: options.contentType ? false : !options.encoding,
-	};
+	const requestOptions = buildHttpRequestOptions(method, `${baseUrl}${endpoint}`, body, options);
 
 	if (options.contentType) {
 		requestOptions.headers = {

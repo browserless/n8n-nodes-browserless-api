@@ -18,6 +18,7 @@ import { functionFields } from './operations/function/description';
 import { exportFields } from './operations/export/description';
 import { performanceFields } from './operations/performance/description';
 import { crawlFields } from './operations/crawl/description';
+import { agentRunFields } from './operations/agentRun/description';
 
 import { execute as executeSmartScrape } from './operations/smartScrape/execute';
 import { execute as executeScreenshot } from './operations/screenshot/execute';
@@ -28,6 +29,7 @@ import { execute as executeFunction } from './operations/function/execute';
 import { execute as executeExport } from './operations/export/execute';
 import { execute as executePerformance } from './operations/performance/execute';
 import { execute as executeCrawl } from './operations/crawl/execute';
+import { execute as executeAgentRun } from './operations/agentRun/execute';
 
 // Operations that accept a URL parameter
 const URL_OPERATIONS = [
@@ -102,6 +104,12 @@ export class Browserless implements INodeType {
 						action: 'Run a performance audit',
 					},
 					{
+						name: 'Run Agent',
+						value: 'agentRun',
+						description: 'Give the browser agent a natural-language task and return its answer',
+						action: 'Run a browser agent task',
+					},
+					{
 						name: 'Run Function',
 						value: 'runFunction',
 						description: 'Execute custom JavaScript/Puppeteer code server-side',
@@ -145,6 +153,7 @@ export class Browserless implements INodeType {
 			...exportFields,
 			...performanceFields,
 			...crawlFields,
+			...agentRunFields,
 		],
 	};
 
@@ -182,6 +191,9 @@ export class Browserless implements INodeType {
 						break;
 					case 'performanceAudit':
 						result = await executePerformance.call(this, i);
+						break;
+					case 'agentRun':
+						result = await executeAgentRun.call(this, i);
 						break;
 					case 'crawl':
 						result = await executeCrawl.call(this, i);
