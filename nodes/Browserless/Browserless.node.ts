@@ -67,6 +67,8 @@ export class Browserless implements INodeType {
 			},
 		],
 		properties: [
+			// Keep v1's flat operation selector; resource grouping needs a versioned node migration.
+			// eslint-disable-next-line @n8n/community-nodes/resource-operation-pattern
 			{
 				displayName: 'Operation',
 				name: 'operation',
