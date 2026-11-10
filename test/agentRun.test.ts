@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import test from 'node:test';
-import type { IExecuteFunctions, IHttpRequestOptions, INodeProperties } from 'n8n-workflow';
+import type {
+	IExecuteFunctions,
+	IHttpRequestOptions,
+	INodeExecutionData,
+	INodeProperties,
+} from 'n8n-workflow';
 
 import { BrowserlessApi } from '../credentials/BrowserlessApi.credentials.ts';
 import { agentRunFields } from '../nodes/Browserless/operations/agentRun/description.ts';
@@ -440,7 +445,35 @@ async function runSmartScrape(
 	return captured;
 }
 
-test('S1 Smart Scrape exposes exactly one optional additional field', () => {
+async function runSmartScrapeCollectingErrors(
+	additionalFields: Record<string, unknown>,
+): Promise<{ captured: IHttpRequestOptions | undefined; output: INodeExecutionData[][] }> {
+	let captured: IHttpRequestOptions | undefined;
+	const context = {
+		getInputData: () => [{ json: {} }],
+		getNodeParameter: (name: string, _index: number, fallback: unknown) => {
+			if (name === 'operation') return 'smartScrape';
+			if (name === 'url') return 'https://example.com';
+			if (name === 'formats' || name === 'options') return fallback;
+			if (name === 'additionalFields') return additionalFields;
+			throw new Error(`Unexpected parameter: ${name}`);
+		},
+		getCredentials: async () => ({ url: 'https://unit.invalid', token: 'redacted' }),
+		getNode: () => ({ name: 'Browserless' }),
+		continueOnFail: () => true,
+		helpers: {
+			httpRequestWithAuthentication: async (_credential: string, options: IHttpRequestOptions) => {
+				captured = options;
+				return { markdown: 'Page content' };
+			},
+		},
+	} as unknown as IExecuteFunctions;
+
+	const output = await browserless.execute.call(context);
+	return { captured, output };
+}
+
+test('S1 Smart Scrape exposes exactly three optional additional fields', () => {
 	const additional = smartScrapeFields.find(({ name }) => name === 'additionalFields');
 	assert.equal(additional?.type, 'collection');
 	assert.deepEqual(additional?.default, {});
@@ -448,11 +481,16 @@ test('S1 Smart Scrape exposes exactly one optional additional field', () => {
 	const settings = (additional?.options ?? []) as INodeProperties[];
 	assert.deepEqual(
 		settings.map(({ name, type, default: defaultValue }) => [name, type, defaultValue]),
-		[['onlyMainContent', 'boolean', false]],
+		[
+			['excludeTags', 'string', ''],
+			['includeTags', 'string', ''],
+			['onlyMainContent', 'boolean', false],
+		],
 	);
-	assert.match(settings[0].description ?? '', /^Whether /);
-	assert.match(settings[0].description ?? '', /API default \(true\)/);
-	assert.match(settings[0].description ?? '', /false to get the full page/);
+	const onlyMainContent = settings.find(({ name }) => name === 'onlyMainContent');
+	assert.match(onlyMainContent?.description ?? '', /^Whether /);
+	assert.match(onlyMainContent?.description ?? '', /API default \(true\)/);
+	assert.match(onlyMainContent?.description ?? '', /false to get the full page/);
 });
 
 test('S2 Smart Scrape preserves the request body when the option is unadded', async () => {
@@ -474,17 +512,19 @@ test('S4 Smart Scrape sends explicit true for main content', async () => {
 	assert.equal((captured?.body as Record<string, unknown>).onlyMainContent, true);
 });
 
-test('S5 Only Main Content does not leak into shared or sibling collections', () => {
+test('S5 Smart Scrape fields do not leak into shared or sibling collections', () => {
 	for (const property of browserless.description.properties) {
 		if (
 			property.name === 'options' ||
 			(property.name === 'additionalFields' &&
 				!property.displayOptions?.show?.operation?.includes('smartScrape'))
 		) {
-			assert.equal(
-				property.options?.some(({ name }) => name === 'onlyMainContent'),
-				false,
-			);
+			for (const field of ['onlyMainContent', 'includeTags', 'excludeTags']) {
+				assert.equal(
+					property.options?.some(({ name }) => name === field),
+					false,
+				);
+			}
 		}
 	}
 });
@@ -499,4 +539,128 @@ test('S6 Smart Scrape registers its additional field on the node', () => {
 		registered,
 		smartScrapeFields.find(({ name }) => name === 'additionalFields'),
 	);
+});
+
+test('T1 Tag options describe their rules', () => {
+	const additional = smartScrapeFields.find(({ name }) => name === 'additionalFields');
+	const settings = (additional?.options ?? []) as INodeProperties[];
+	for (const field of ['includeTags', 'excludeTags']) {
+		const option = settings.find(({ name }) => name === field);
+		assert.ok(option);
+		assert.match(option.description ?? '', /CSS selectors/);
+		assert.match(option.description ?? '', /up to 100/);
+		assert.match(
+			option.description ?? '',
+			field === 'includeTags' ? /Exclude Tags/ : /Include Tags/,
+		);
+		assert.match(option.placeholder ?? '', /^e.g. /);
+		if (field === 'includeTags') assert.match(option.description ?? '', /Only Main Content/);
+	}
+});
+
+test('T2 Include Tags is trimmed and empties dropped', async () => {
+	const captured = await runSmartScrape({ includeTags: ' article , main ,, .price ,' });
+	assert.deepEqual(captured?.body, {
+		url: 'https://example.com',
+		formats: ['markdown'],
+		includeTags: ['article', 'main', '.price'],
+	});
+});
+
+test('T3 Exclude Tags is sent', async () => {
+	const captured = await runSmartScrape({ excludeTags: 'nav,footer' });
+	assert.deepEqual(captured?.body, {
+		url: 'https://example.com',
+		formats: ['markdown'],
+		excludeTags: ['nav', 'footer'],
+	});
+});
+
+test('T4 A list from an expression is passed through', async () => {
+	const captured = await runSmartScrape({ includeTags: [' article ', '', 'h1, h2'] });
+	assert.deepEqual((captured?.body as Record<string, unknown>).includeTags, ['article', 'h1, h2']);
+});
+
+test('T5 Empty lists are not sent', async () => {
+	const captured = await runSmartScrape({ includeTags: ' , ', excludeTags: '' });
+	assert.deepEqual(captured?.body, { url: 'https://example.com', formats: ['markdown'] });
+});
+
+test('T6 Include and Exclude is rejected before sending', async () => {
+	const { captured, output } = await runSmartScrapeCollectingErrors({
+		includeTags: 'article',
+		excludeTags: 'nav',
+	});
+	assert.equal(output[0][0].json.error, 'Include Tags and Exclude Tags cannot be combined');
+	assert.equal(captured, undefined);
+});
+
+test('T7 Include and Only Main Content on is rejected', async () => {
+	const { captured, output } = await runSmartScrapeCollectingErrors({
+		includeTags: 'article',
+		onlyMainContent: true,
+	});
+	assert.equal(
+		output[0][0].json.error,
+		'Include Tags cannot be combined with Only Main Content turned on',
+	);
+	assert.equal(captured, undefined);
+});
+
+test('T8 Include and Only Main Content off is allowed', async () => {
+	const captured = await runSmartScrape({ includeTags: 'article', onlyMainContent: false });
+	assert.deepEqual(captured?.body, {
+		url: 'https://example.com',
+		formats: ['markdown'],
+		onlyMainContent: false,
+		includeTags: ['article'],
+	});
+});
+
+test('T9 Exclude and Only Main Content on is allowed', async () => {
+	const captured = await runSmartScrape({ excludeTags: 'nav', onlyMainContent: true });
+	assert.deepEqual(captured?.body, {
+		url: 'https://example.com',
+		formats: ['markdown'],
+		onlyMainContent: true,
+		excludeTags: ['nav'],
+	});
+});
+
+test('T10 Selector lists accept 100 entries and reject 101', async () => {
+	const hundred = Array.from({ length: 100 }, (_, index) => `.c${index}`);
+	for (const field of ['includeTags', 'excludeTags']) {
+		const captured = await runSmartScrape({ [field]: ` , ${hundred.join(',')}, , ` });
+		assert.deepEqual((captured?.body as Record<string, unknown>)[field], hundred);
+	}
+	for (const [field, label] of [
+		['includeTags', 'Include Tags'],
+		['excludeTags', 'Exclude Tags'],
+	]) {
+		const { captured, output } = await runSmartScrapeCollectingErrors({
+			[field]: [...hundred, '.c100'].join(','),
+		});
+		assert.equal(output[0][0].json.error, `${label} accepts at most 100 selectors`);
+		assert.equal(captured, undefined);
+	}
+});
+
+test('T11 Wrong selector types are rejected', async () => {
+	for (const [fields, message] of [
+		[{ includeTags: 42 }, 'Include Tags must be a comma-separated list of CSS selectors'],
+		[{ excludeTags: ['nav', 1] }, 'Exclude Tags must be a comma-separated list of CSS selectors'],
+	] as const) {
+		const { captured, output } = await runSmartScrapeCollectingErrors(fields);
+		assert.equal(output[0][0].json.error, message);
+		assert.equal(captured, undefined);
+	}
+});
+
+test('T12 Conflicts use the tidied lists', async () => {
+	const captured = await runSmartScrape({ includeTags: 'article', excludeTags: ' , ' });
+	assert.deepEqual(captured?.body, {
+		url: 'https://example.com',
+		formats: ['markdown'],
+		includeTags: ['article'],
+	});
 });
