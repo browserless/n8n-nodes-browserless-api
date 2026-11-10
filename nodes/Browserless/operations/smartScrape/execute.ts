@@ -9,12 +9,20 @@ export async function execute(
 	const url = this.getNodeParameter('url', index) as string;
 	const formats = this.getNodeParameter('formats', index, ['markdown']) as string[];
 	const options = this.getNodeParameter('options', index, {}) as Record<string, unknown>;
+	const additionalFields = this.getNodeParameter('additionalFields', index, {}) as Record<
+		string,
+		unknown
+	>;
 
 	const body: Record<string, unknown> = {
 		url,
 		formats,
 		...buildRequestOptions(options),
 	};
+
+	if (additionalFields.onlyMainContent !== undefined) {
+		body.onlyMainContent = additionalFields.onlyMainContent;
+	}
 
 	const response = (await browserlessApiRequest.call(
 		this,

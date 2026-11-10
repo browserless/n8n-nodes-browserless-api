@@ -7,6 +7,7 @@ import type { IExecuteFunctions, IHttpRequestOptions, INodeProperties } from 'n8
 
 import { BrowserlessApi } from '../credentials/BrowserlessApi.credentials.ts';
 import { agentRunFields } from '../nodes/Browserless/operations/agentRun/description.ts';
+import { smartScrapeFields } from '../nodes/Browserless/operations/smartScrape/description.ts';
 import {
 	buildAgentRunBody,
 	DEFAULT_TIMEOUT_MS,
@@ -409,4 +410,93 @@ test('supplement dispatches Agent Run and preserves paired-item metadata', async
 	]);
 	assert.equal(captured?.method, 'POST');
 	assert.equal(captured?.url, 'https://unit.invalid/agent/run');
+});
+
+async function runSmartScrape(
+	additionalFields: Record<string, unknown>,
+): Promise<IHttpRequestOptions | undefined> {
+	let captured: IHttpRequestOptions | undefined;
+	const context = {
+		getInputData: () => [{ json: {} }],
+		getNodeParameter: (name: string, _index: number, fallback: unknown) => {
+			if (name === 'operation') return 'smartScrape';
+			if (name === 'url') return 'https://example.com';
+			if (name === 'formats' || name === 'options') return fallback;
+			if (name === 'additionalFields') return additionalFields;
+			throw new Error(`Unexpected parameter: ${name}`);
+		},
+		getCredentials: async () => ({ url: 'https://unit.invalid', token: 'redacted' }),
+		getNode: () => ({ name: 'Browserless' }),
+		continueOnFail: () => false,
+		helpers: {
+			httpRequestWithAuthentication: async (_credential: string, options: IHttpRequestOptions) => {
+				captured = options;
+				return { markdown: 'Page content' };
+			},
+		},
+	} as unknown as IExecuteFunctions;
+
+	await browserless.execute.call(context);
+	return captured;
+}
+
+test('S1 Smart Scrape exposes exactly one optional additional field', () => {
+	const additional = smartScrapeFields.find(({ name }) => name === 'additionalFields');
+	assert.equal(additional?.type, 'collection');
+	assert.deepEqual(additional?.default, {});
+	assert.deepEqual(additional?.displayOptions?.show?.operation, ['smartScrape']);
+	const settings = (additional?.options ?? []) as INodeProperties[];
+	assert.deepEqual(
+		settings.map(({ name, type, default: defaultValue }) => [name, type, defaultValue]),
+		[['onlyMainContent', 'boolean', false]],
+	);
+	assert.match(settings[0].description ?? '', /^Whether /);
+	assert.match(settings[0].description ?? '', /API default \(true\)/);
+	assert.match(settings[0].description ?? '', /false to get the full page/);
+});
+
+test('S2 Smart Scrape preserves the request body when the option is unadded', async () => {
+	const captured = await runSmartScrape({});
+	assert.equal(captured?.method, 'POST');
+	assert.equal(captured?.url, 'https://unit.invalid/smart-scrape');
+	assert.deepEqual(captured?.body, { url: 'https://example.com', formats: ['markdown'] });
+});
+
+test('S3 Smart Scrape sends explicit false for the full page', async () => {
+	const captured = await runSmartScrape({ onlyMainContent: false });
+	const body = captured?.body as Record<string, unknown>;
+	assert.equal(Object.hasOwn(body, 'onlyMainContent'), true);
+	assert.equal(body.onlyMainContent, false);
+});
+
+test('S4 Smart Scrape sends explicit true for main content', async () => {
+	const captured = await runSmartScrape({ onlyMainContent: true });
+	assert.equal((captured?.body as Record<string, unknown>).onlyMainContent, true);
+});
+
+test('S5 Only Main Content does not leak into shared or sibling collections', () => {
+	for (const property of browserless.description.properties) {
+		if (
+			property.name === 'options' ||
+			(property.name === 'additionalFields' &&
+				!property.displayOptions?.show?.operation?.includes('smartScrape'))
+		) {
+			assert.equal(
+				property.options?.some(({ name }) => name === 'onlyMainContent'),
+				false,
+			);
+		}
+	}
+});
+
+test('S6 Smart Scrape registers its additional field on the node', () => {
+	const registered = browserless.description.properties.find(
+		({ name, displayOptions }) =>
+			name === 'additionalFields' && displayOptions?.show?.operation?.includes('smartScrape'),
+	);
+	assert.ok(registered);
+	assert.deepEqual(
+		registered,
+		smartScrapeFields.find(({ name }) => name === 'additionalFields'),
+	);
 });
