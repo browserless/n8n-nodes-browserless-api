@@ -33,12 +33,30 @@ export const smartScrapeFields: INodeProperties[] = [
 		},
 		options: [
 			{
+				displayName: 'Exclude Tags',
+				name: 'excludeTags',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. nav, footer, .cookie-banner',
+				description:
+					'Comma-separated CSS selectors to remove from the page output, up to 100. Malformed selectors are ignored. Cannot be combined with Include Tags.',
+			},
+			{
+				displayName: 'Include Tags',
+				name: 'includeTags',
+				type: 'string',
+				default: '',
+				placeholder: 'e.g. article, main, .price',
+				description:
+					'Comma-separated CSS selectors to keep in the page output, up to 100. Malformed selectors are ignored; if no selector matches, unfiltered content is returned. Cannot be combined with Exclude Tags or with Only Main Content turned on. Selectors that contain a comma must be passed as an expression returning a list.',
+			},
+			{
 				displayName: 'Only Main Content',
 				name: 'onlyMainContent',
 				type: 'boolean',
 				default: false,
 				description:
-					'Whether to keep only the main content of the page, removing navigation, headers, footers and sidebars. If this field is not added, the API default (true) applies. Set to false to get the full page.',
+					'Whether to keep only the main content of the page, removing navigation, headers, footers and sidebars. If this field is not added, the API default (true) applies, except when Include Tags is set. Set to false to get the full page.',
 			},
 		],
 	},
