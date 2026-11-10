@@ -39,7 +39,7 @@ export const smartScrapeFields: INodeProperties[] = [
 				default: '',
 				placeholder: 'e.g. nav, footer, .cookie-banner',
 				description:
-					'Comma-separated CSS selectors to remove from the page output, up to 100. Malformed selectors are ignored. Cannot be combined with Include Tags.',
+					'Comma-separated CSS selectors to remove from the page output, up to 100. Malformed selectors are ignored. Cannot be combined with Include Tags. Selectors that contain a comma must be passed as an expression returning a list.',
 			},
 			{
 				displayName: 'Include Tags',
