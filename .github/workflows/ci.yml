@@ -6,20 +6,29 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Use Node.js
         uses: actions/setup-node@v6.4.0
         with:
           node-version: '24'
           check-latest: true
-      - name: Ensure npm >= 11.10.0 (min-release-age support)
-        run: npm install -g npm@11.17.0 --ignore-scripts
+          package-manager-cache: false
+      - name: Assert bundled npm >= 11.10.0 (min-release-age support)
+        run: |
+          node -e 'const [major, minor] = process.argv[1].split(".").map(Number); if (!(major > 11 || (major === 11 && minor >= 10))) process.exit(1)' "$(npm --version)"
 
       - name: Install dependencies
         run: 'npm ci'
