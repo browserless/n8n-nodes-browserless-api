@@ -1,0 +1,5 @@
+rules:
+  dependabot-cooldown:
+    config:
+      # Approved minimum; npm test independently checks every updater and bypass.
+      days: 3
