@@ -3,7 +3,7 @@ name: Publish to npm
 on:
   push:
     tags:
-      - '*.*.*'
+      - 'v*'
 
 permissions: {}
 
@@ -34,7 +34,7 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main
-          node -e 'const assert = require("node:assert/strict"); const pkg = require("./package.json"); assert.equal(pkg.name, "n8n-nodes-browserless-api"); assert.equal(process.env.TAG.replace(/^v/, ""), pkg.version)'
+          node -e 'const assert = require("node:assert/strict"); const pkg = require("./package.json"); assert.equal(pkg.name, "n8n-nodes-browserless-api"); assert.equal(process.env.TAG, "v" + pkg.version)'
       - name: Install dependencies
         run: npm ci
       - name: Run lint
@@ -68,13 +68,9 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 15
     permissions:
-      contents: read
       # Provenance still needs OIDC; registry authentication remains NPM_TOKEN.
       id-token: write
     steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
       - name: Use Node.js
         uses: actions/setup-node@v6.4.0
         with:
@@ -100,21 +96,27 @@ jobs:
           [ "${#archives[@]}" -eq 1 ] && [ -f "${archives[0]}" ] && [ ! -L "${archives[0]}" ] || { echo 'expected exactly one npm archive' >&2; exit 1; }
           [[ "$PACKAGE_SHA256" =~ ^[0-9a-f]{64}$ ]] || { echo 'invalid package checksum' >&2; exit 1; }
           printf '%s  %s\n' "$PACKAGE_SHA256" "${archives[0]}" | sha256sum --check
-          tar -xOf "${archives[0]}" package/package.json > "$RUNNER_TEMP/package.json"
+          # Use npm's parser: tar member names can alias the manifest after extraction.
+          npm pack "${archives[0]}" --dry-run --json --ignore-scripts > "$RUNNER_TEMP/manifest.json"
           node <<'NODE'
           const assert = require('node:assert/strict');
           const fs = require('node:fs');
-          const pkg = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/package.json`, 'utf8'));
+          const packages = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/manifest.json`, 'utf8'));
+          assert.equal(packages.length, 1);
+          const [pkg] = packages;
           assert.equal(pkg.name, 'n8n-nodes-browserless-api');
           assert.match(pkg.version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/);
-          assert.equal(process.env.TAG.replace(/^v/, ''), pkg.version);
+          assert.equal(process.env.TAG, `v${pkg.version}`);
           fs.appendFileSync(process.env.GITHUB_ENV, `DIST_TAG=${pkg.version.includes('-') ? 'next' : 'latest'}\n`);
           NODE
       # No installs, builds, caches, or lifecycle scripts in this privileged job.
       # Tarball publishing omits gitHead; provenance identifies the source commit.
       - name: Publish with provenance
+        shell: bash
         run: |
           archive="$RUNNER_TEMP/npm-package/package.tgz"
-          npm publish "$archive" --provenance --access public --ignore-scripts --tag "$DIST_TAG"
+          args=()
+          if [ "$DIST_TAG" = next ]; then args+=(--tag next); fi
+          npm publish "$archive" --provenance --access public --ignore-scripts "${args[@]}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

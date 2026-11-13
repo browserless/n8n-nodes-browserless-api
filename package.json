@@ -27,6 +27,11 @@
 		"prepublishOnly": "n8n-node prerelease",
 		"hooks:install": "husky"
 	},
+	"release-it": {
+		"git": {
+			"tagName": "v${version}"
+		}
+	},
 	"files": [
 		"dist"
 	],

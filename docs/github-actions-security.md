@@ -37,14 +37,34 @@ each locked action's `action.yml` and revisit exceptions after tool updates.
   `test/workflowSecurity.test.cjs` checks every updater because zizmor 1.32.0
   stops after its first compliant entry and does not fully enforce explicit
   cooldowns, SemVer overrides, or filters. The guard rejects unknown cooldown
-  keys, YAML merge keys/tags, and `%YAML` directives; ordinary anchors/aliases
-  remain supported. Remove the guard only after an upgraded analyzer catches
-  the same regression cases.
+  keys, non-integer or out-of-range (3–90 days) delays, YAML merge keys/tags,
+  `%YAML` directives, and a competing `dependabot.yaml`; ordinary anchors/aliases
+  remain supported. Remove it only after an upgraded analyzer catches these cases.
 - actionlint 1.7.12 skips some remote-action input schemas at full-semver refs.
   Review those inputs manually; there are no global input/runner suppressions.
 - Publication retains `NPM_TOKEN` authentication and OIDC for `--provenance`.
   Dependency execution and packing occur in a separate job without either
-  identity. The privileged job publishes the checksum-verified same-run tarball
-  with `--ignore-scripts`, without rebuilding. As before, `prepublishOnly` does
-  not run. Tarball publication omits `gitHead`; provenance identifies the commit.
+  identity. That job controls the entire tarball, so the privileged job checks
+  name/version with npm's own parser, not a literal tar member:
+  `npm pack <tgz> --dry-run --json --ignore-scripts`. The checksum ensures
+  same-run byte integrity, not trusted contents. Publication uses `--ignore-scripts`
+  without rebuilding or checking out source. As before, `prepublishOnly` does
+  not run. Stable releases use npm's implicit `latest` guard; prereleases use
+  `--tag next`. Tarball publication omits `gitHead`; provenance identifies the commit.
   Do not change credentials without an approved, empirically verified migration.
+- Future release tags are **`v<package.json version>` only**, matching the
+  v-prefixed release convention in sibling repositories. Historical unprefixed
+  tags remain unchanged; release-it now produces v-prefixed tags. Administrator
+  follow-up must use **`v*` for both the tag ruleset (create/update/delete) and the
+  `npm` environment's tag deployment policy**, without required reviewers.
+  Before requiring main's checks, accommodate the direct-push release actor
+  with an approved bypass or switch to PR-based release commits: a non-atomic
+  `--follow-tags` push can otherwise publish a tag without its main commit.
+- Environment attachment remains deferred: configure the tag protections, move
+  `NPM_TOKEN` into the `npm` environment, attach only `publish` to it, and delete
+  the repository-level secret in a coordinated administrator follow-up. Until
+  deletion, branch workflows can still access the repository secret. Treat token
+  scope/expiry validation (granular write access to this package only) as a
+  **release blocker**, then separately authorize a prerelease canary on `next`.
+  Token-based CI published the former scoped package in April 2026, but every
+  post-rename CI run failed; historical success does not validate today's secret.
